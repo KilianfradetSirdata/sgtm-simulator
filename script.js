@@ -408,7 +408,7 @@ document.addEventListener('DOMContentLoaded', function() {
         resultsContainer.innerHTML = `
             <div>
                 <div class="rounded-top">
-                    <h2>Résultats de l'analyse</h2>
+                    <h2>Résultats de l'analyse <span style="font-style: italic; font-size: 0.4em; color: #64b5f6; cursor: pointer; text-decoration: none; margin-left: 15px;" onclick="showCalculationRules()" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Voir les règles de calcul</span></h2>
                 </div>
                 <div class="results-container">
                     <div class="performance-section">
@@ -772,3 +772,552 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 });
+
+// Fonction pour afficher les règles de calcul
+function showCalculationRules() {
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1001;
+        opacity: 0;
+        transition: opacity 0.3s ease-in-out;
+    `;
+    
+    const modalContent = document.createElement('div');
+    modalContent.style.cssText = `
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+        border-radius: 15px;
+        max-width: 90vw;
+        width: 800px;
+        max-height: 90vh;
+        overflow: hidden;
+        color: white;
+        box-shadow: -5px 0 15px rgba(0, 0, 0, 0.3);
+        position: relative;
+        display: flex;
+        flex-direction: column;
+    `;
+    
+
+    
+    modalContent.innerHTML = `
+        <!-- Header sticky -->
+        <div style="
+            position: sticky;
+            top: 0;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            padding: 2rem 4rem 1rem 2rem;
+            border-bottom: 1px solid rgba(6, 182, 212, 0.2);
+            z-index: 10;
+            border-radius: 15px 15px 0 0;
+            position: relative;
+        ">
+            <h2 style="color:rgb(255, 255, 255); font-weight: 700; margin: 0; font-size: 2.2rem;">Règles de calcul du simulateur</h2>
+            <button onclick="this.closest('.modal').remove()" style="
+                position: absolute;
+                top: 15px;
+                right: 15px;
+                font-size: 1.5rem;
+                cursor: pointer;
+                color: #ffffff;
+                background: rgba(6, 182, 212, 0.1);
+                border: 1px solid rgb(255, 255, 255);
+                border-radius: 50%;
+                width: 40px;
+                height: 40px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.3s ease;
+            " onmouseover="this.style.color='#ffffff9e'; this.style.background='#ffffff78'; this.style.borderColor='#ffffff';" onmouseout="this.style.color='#ffffff'; this.style.background='rgba(6, 182, 212, 0.1)'; this.style.borderColor='rgb(255, 255, 255)'">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <!-- Body scrollable -->
+        <div style="
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem 2rem 2rem 2rem;
+        ">
+        
+        <div style="line-height: 1.6; font-size: 14px;">
+            <p>Le simulateur estime les gains techniques, marketing et réglementaires qu'un site pourrait obtenir en passant de Google Tag Manager Web (client-side) à GTM Server Side (sGTM).</p>
+            <p>Le simulateur croise :</p>
+            <p>✅ les tags utilisés par le site<br>
+            🏭 le secteur d'activité<br>
+            📈 le volume de trafic<br>
+            🔎 les données techniques détectées (poids JS, requêtes, temps de chargement…)</p>
+            <p>… avec des pondérations précises pour estimer :</p>
+            <p>⚡ la performance technique<br>
+            📀 les gains business<br>
+            🛡️ la conformité RGPD<br>
+            🔐 la fiabilité et le contrôle</p>
+            
+            <div style="
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin: 2rem 0;
+                padding: 1.5rem;
+                background: linear-gradient(135deg, rgba(6, 182, 212, 0.15) 0%, rgba(14, 165, 233, 0.1) 100%);
+                border-radius: 20px;
+                border: 1px solid rgba(6, 182, 212, 0.3);
+                position: relative;
+                overflow: hidden;
+            " class="modal-section-header-performance">
+                <i class="fas fa-tachometer-alt" style="
+                    color: #06b6d4;
+                    font-size: 2rem;
+                    margin-right: 1rem;
+                    filter: drop-shadow(0 0 15px rgba(6, 182, 212, 0.4));
+                "></i>
+                <h2 style="
+                    color: white;
+                    font-size: 1.8rem;
+                    font-weight: 900;
+                    margin: 0;
+                    text-transform: uppercase;
+                    letter-spacing: 0.1em;
+                    text-shadow: 0 0 20px rgba(6, 182, 212, 0.3);
+                ">PERFORMANCE</h2>
+            </div>
+            <p><strong>Objectif :</strong> estimer les gains techniques avec sGTM.</p>
+            
+            <h4 style="color: #64b5f6; margin-top: 20px;">🔹 1. Temps de chargement</h4>
+            <p><strong>Calculé selon :</strong><br>
+            • Base du secteur (poids moyen des scripts marketing)<br>
+            • Impact total des tags sélectionnés</p>
+            <p><strong>Formule :</strong><br>
+            Gain = Base secteur + (Impact tags × 0.3%), capé à 75%</p>
+            
+            <div style="
+                background: linear-gradient(135deg, rgba(15, 23, 42, 0.98) 0%, rgba(30, 41, 59, 0.95) 50%, rgba(15, 23, 42, 0.98) 100%);
+                border: 1px solid rgba(6, 182, 212, 0.4);
+                border-radius: 20px;
+                padding: 1.5rem;
+                margin: 1.5rem 0;
+                position: relative;
+                overflow: hidden;
+                backdrop-filter: blur(25px);
+                box-shadow: 0 15px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            " class="modal-performance-card">
+                <h5 style="color: #06b6d4; font-weight: 700; margin-bottom: 1rem;">Pondération par secteur</h5>
+                <table style="width: 100%; color: white; font-size: 14px; border-collapse: collapse;">
+                    <tr style="border-bottom: 1px solid rgba(6, 182, 212, 0.2);">
+                        <td style="padding: 8px 0; font-weight: 700; color: #06b6d4;">Secteur</td>
+                        <td style="padding: 8px 0; font-weight: 700; color: #06b6d4; text-align: right;">Base (%)</td>
+                    </tr>
+                    <tr><td style="padding: 6px 0;">E-commerce</td><td style="padding: 6px 0; text-align: right;">40</td></tr>
+                    <tr><td style="padding: 6px 0;">Media</td><td style="padding: 6px 0; text-align: right;">40</td></tr>
+                    <tr><td style="padding: 6px 0;">Travel</td><td style="padding: 6px 0; text-align: right;">30</td></tr>
+                    <tr><td style="padding: 6px 0;">Automotive</td><td style="padding: 6px 0; text-align: right;">30</td></tr>
+                    <tr><td style="padding: 6px 0;">Finance</td><td style="padding: 6px 0; text-align: right;">20</td></tr>
+                    <tr><td style="padding: 6px 0;">Real-estate</td><td style="padding: 6px 0; text-align: right;">20</td></tr>
+                    <tr><td style="padding: 6px 0;">Other</td><td style="padding: 6px 0; text-align: right;">20</td></tr>
+                </table>
+            </div>
+            
+            <div style="
+                background: linear-gradient(135deg, rgba(15, 23, 42, 0.98) 0%, rgba(30, 41, 59, 0.95) 50%, rgba(15, 23, 42, 0.98) 100%);
+                border: 1px solid rgba(6, 182, 212, 0.4);
+                border-radius: 20px;
+                padding: 1.5rem;
+                margin: 1.5rem 0;
+                position: relative;
+                overflow: hidden;
+                backdrop-filter: blur(25px);
+                box-shadow: 0 15px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            " class="modal-performance-card">
+                <h5 style="color: #06b6d4; margin-top: 0; font-weight: 700;">Impact des tags (Load Time)</h5>
+                <table style="width: 100%; color: white; font-size: 13px;">
+                    <tr><td><strong>Tag</strong></td><td><strong>Impact</strong></td></tr>
+                    <tr><td>Google Analytics</td><td>10</td></tr>
+                    <tr><td>GTM Web</td><td>10</td></tr>
+                    <tr><td>Google Ads</td><td>12</td></tr>
+                    <tr><td>Meta Pixel</td><td>12</td></tr>
+                    <tr><td>Matomo</td><td>2</td></tr>
+                    <tr><td>TikTok Pixel</td><td>12</td></tr>
+                    <tr><td>Criteo</td><td>12</td></tr>
+                    <tr><td>LinkedIn Insight</td><td>6</td></tr>
+                    <tr><td>Hotjar</td><td>6</td></tr>
+                    <tr><td>Clarity</td><td>4</td></tr>
+                    <tr><td>Consent CMP</td><td>3</td></tr>
+                </table>
+            </div>
+            
+            <h4 style="color: #64b5f6; margin-top: 20px;">🔹 2. Requêtes scripts</h4>
+            <p><strong>Formule :</strong><br>
+            Taux de réduction = 15% + (Impact tags × 0.5%) × modif secteur + 15% × ratio tiers, capé à 65%</p>
+            
+            <div style="
+                background: linear-gradient(135deg, rgba(15, 23, 42, 0.98) 0%, rgba(30, 41, 59, 0.95) 50%, rgba(15, 23, 42, 0.98) 100%);
+                border: 1px solid rgba(6, 182, 212, 0.4);
+                border-radius: 20px;
+                padding: 1.5rem;
+                margin: 1.5rem 0;
+                position: relative;
+                overflow: hidden;
+                backdrop-filter: blur(25px);
+                box-shadow: 0 15px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            " class="modal-performance-card">
+                <h5 style="color: #06b6d4; margin-top: 0; font-weight: 700;">Modificateur par secteur</h5>
+                <table style="width: 100%; color: white; font-size: 13px;">
+                    <tr><td><strong>Secteur</strong></td><td><strong>Modif. requêtes</strong></td></tr>
+                    <tr><td>E-commerce</td><td>1.2</td></tr>
+                    <tr><td>Media</td><td>1.2</td></tr>
+                    <tr><td>Travel</td><td>1.1</td></tr>
+                    <tr><td>Automotive</td><td>1.0</td></tr>
+                    <tr><td>Finance</td><td>0.9</td></tr>
+                    <tr><td>Real-estate</td><td>0.9</td></tr>
+                    <tr><td>Other</td><td>1.0</td></tr>
+                </table>
+            </div>
+            
+            <h4 style="color: #64b5f6; margin-top: 20px;">🔹 3. Poids total des scripts</h4>
+            <p>Estimé à -30%, réajusté selon le gain sur les requêtes.</p>
+            
+            <div style="
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin: 2rem 0;
+                padding: 1.5rem;
+                background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(34, 197, 94, 0.1) 100%);
+                border-radius: 20px;
+                border: 1px solid rgba(16, 185, 129, 0.3);
+                position: relative;
+                overflow: hidden;
+            " class="modal-section-header-business">
+                <i class="fas fa-chart-line" style="
+                    color: #10b981;
+                    font-size: 2rem;
+                    margin-right: 1rem;
+                    filter: drop-shadow(0 0 15px rgba(16, 185, 129, 0.4));
+                "></i>
+                <h2 style="
+                    color: white;
+                    font-size: 1.8rem;
+                    font-weight: 900;
+                    margin: 0;
+                    text-transform: uppercase;
+                    letter-spacing: 0.1em;
+                    text-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+                ">GAIN BUSINESS</h2>
+            </div>
+            <p><strong>Objectif :</strong> traduire les gains techniques en bénéfices concrets pour le marketing.</p>
+            
+            <h4 style="color: #64b5f6; margin-top: 20px;">🔹 1. Gain global pondéré</h4>
+            <p><strong>Formule :</strong><br>
+            Gain = Σ(Impact Tags) × coef secteur × coef trafic</p>
+            
+            <div style="
+                background: linear-gradient(135deg, rgba(15, 23, 42, 0.98) 0%, rgba(30, 41, 59, 0.95) 50%, rgba(15, 23, 42, 0.98) 100%);
+                border: 1px solid rgba(16, 185, 129, 0.4);
+                border-radius: 20px;
+                padding: 1.5rem;
+                margin: 1.5rem 0;
+                position: relative;
+                overflow: hidden;
+                backdrop-filter: blur(25px);
+                box-shadow: 0 15px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            " class="modal-business-card">
+                <h5 style="color: #10b981; margin-top: 0; font-weight: 700;">Impact business des tags</h5>
+                <table style="width: 100%; color: white; font-size: 13px;">
+                    <tr><td><strong>Tag</strong></td><td><strong>Impact</strong></td></tr>
+                    <tr><td>Google Analytics</td><td>4</td></tr>
+                    <tr><td>GTM Web</td><td>4</td></tr>
+                    <tr><td>Google Ads</td><td>5</td></tr>
+                    <tr><td>Meta Pixel</td><td>7</td></tr>
+                    <tr><td>Matomo</td><td>2</td></tr>
+                    <tr><td>TikTok Pixel</td><td>5</td></tr>
+                    <tr><td>Criteo</td><td>6</td></tr>
+                    <tr><td>LinkedIn Insight</td><td>4</td></tr>
+                    <tr><td>Hotjar</td><td>4</td></tr>
+                    <tr><td>Clarity</td><td>2</td></tr>
+                    <tr><td>Consent CMP</td><td>2</td></tr>
+                </table>
+            </div>
+            
+            <div style="
+                background: linear-gradient(135deg, rgba(15, 23, 42, 0.98) 0%, rgba(30, 41, 59, 0.95) 50%, rgba(15, 23, 42, 0.98) 100%);
+                border: 1px solid rgba(16, 185, 129, 0.4);
+                border-radius: 20px;
+                padding: 1.5rem;
+                margin: 1.5rem 0;
+                position: relative;
+                overflow: hidden;
+                backdrop-filter: blur(25px);
+                box-shadow: 0 15px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            " class="modal-business-card">
+                <h5 style="color: #10b981; margin-top: 0; font-weight: 700;">Coefficient par secteur</h5>
+                <table style="width: 100%; color: white; font-size: 13px;">
+                    <tr><td><strong>Secteur</strong></td><td><strong>Coef</strong></td></tr>
+                    <tr><td>E-commerce</td><td>1.3</td></tr>
+                    <tr><td>Media</td><td>1.2</td></tr>
+                    <tr><td>Finance</td><td>1.1</td></tr>
+                    <tr><td>Travel</td><td>1.15</td></tr>
+                    <tr><td>Automotive</td><td>1.1</td></tr>
+                    <tr><td>Real-estate</td><td>1.05</td></tr>
+                    <tr><td>Other</td><td>1.0</td></tr>
+                </table>
+            </div>
+            
+            <div style="
+                background: linear-gradient(135deg, rgba(15, 23, 42, 0.98) 0%, rgba(30, 41, 59, 0.95) 50%, rgba(15, 23, 42, 0.98) 100%);
+                border: 1px solid rgba(16, 185, 129, 0.4);
+                border-radius: 20px;
+                padding: 1.5rem;
+                margin: 1.5rem 0;
+                position: relative;
+                overflow: hidden;
+                backdrop-filter: blur(25px);
+                box-shadow: 0 15px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            " class="modal-business-card">
+                <h5 style="color: #10b981; margin-top: 0; font-weight: 700;">Coefficient par volume de hits</h5>
+                <table style="width: 100%; color: white; font-size: 13px;">
+                    <tr><td><strong>Volume mensuel</strong></td><td><strong>Coef</strong></td></tr>
+                    <tr><td>less-than-10k</td><td>1.0</td></tr>
+                    <tr><td>10k–50k</td><td>1.1</td></tr>
+                    <tr><td>50k–100k</td><td>1.25</td></tr>
+                    <tr><td>100k–500k</td><td>1.4</td></tr>
+                    <tr><td>more-than-1m</td><td>1.6</td></tr>
+                </table>
+            </div>
+            
+            <h4 style="color: #64b5f6; margin-top: 20px;">🔹 2. Collecte & conversions</h4>
+            <div style="
+                background: linear-gradient(135deg, rgba(15, 23, 42, 0.98) 0%, rgba(30, 41, 59, 0.95) 50%, rgba(15, 23, 42, 0.98) 100%);
+                border: 1px solid rgba(16, 185, 129, 0.4);
+                border-radius: 20px;
+                padding: 1.5rem;
+                margin: 1.5rem 0;
+                position: relative;
+                overflow: hidden;
+                backdrop-filter: blur(25px);
+                box-shadow: 0 15px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            " class="modal-business-card">
+                <h5 style="color: #10b981; margin-top: 0; font-weight: 700;">Valeurs de base par secteur</h5>
+                <table style="width: 100%; color: white; font-size: 13px;">
+                    <tr><td><strong>Secteur</strong></td><td><strong>Collecte (%)</strong></td><td><strong>Conversions (%)</strong></td></tr>
+                    <tr><td>E-commerce</td><td>65</td><td>70</td></tr>
+                    <tr><td>Media</td><td>50</td><td>60</td></tr>
+                    <tr><td>Finance</td><td>60</td><td>65</td></tr>
+                    <tr><td>Travel</td><td>60</td><td>68</td></tr>
+                    <tr><td>Automotive</td><td>55</td><td>62</td></tr>
+                    <tr><td>Real-estate</td><td>50</td><td>58</td></tr>
+                    <tr><td>Other</td><td>60</td><td>65</td></tr>
+                </table>
+            </div>
+            <p>Conversions mesurées = +30% du gain global<br>
+            Collecte des données = base + gain global (max 95%)</p>
+            
+            <h4 style="color: #64b5f6; margin-top: 20px;">🔹 3. ROAS estimé</h4>
+            <div style="
+                background: linear-gradient(135deg, rgba(15, 23, 42, 0.98) 0%, rgba(30, 41, 59, 0.95) 50%, rgba(15, 23, 42, 0.98) 100%);
+                border: 1px solid rgba(16, 185, 129, 0.4);
+                border-radius: 20px;
+                padding: 1.5rem;
+                margin: 1.5rem 0;
+                position: relative;
+                overflow: hidden;
+                backdrop-filter: blur(25px);
+                box-shadow: 0 15px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            " class="modal-business-card">
+                <h5 style="color: #10b981; margin-top: 0; font-weight: 700;">ROAS de base par secteur</h5>
+                <table style="width: 100%; color: white; font-size: 13px;">
+                    <tr><td><strong>Secteur</strong></td><td><strong>ROAS (x)</strong></td></tr>
+                    <tr><td>E-commerce</td><td>4.0</td></tr>
+                    <tr><td>Media</td><td>2.5</td></tr>
+                    <tr><td>Finance</td><td>3.2</td></tr>
+                    <tr><td>Travel</td><td>3.8</td></tr>
+                    <tr><td>Automotive</td><td>2.7</td></tr>
+                    <tr><td>Real-estate</td><td>2.4</td></tr>
+                    <tr><td>Other</td><td>3.0</td></tr>
+                </table>
+            </div>
+            <p><strong>Formule :</strong><br>
+            ROAS = ROAS base × (1 + 0.2% × gain global)</p>
+            
+            <div style="
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin: 2rem 0;
+                padding: 1.5rem;
+                background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(251, 191, 36, 0.1) 100%);
+                border-radius: 20px;
+                border: 1px solid rgba(245, 158, 11, 0.3);
+                position: relative;
+                overflow: hidden;
+            " class="modal-section-header-privacy">
+                <i class="fas fa-shield-alt" style="
+                    color: #f59e0b;
+                    font-size: 2rem;
+                    margin-right: 1rem;
+                    filter: drop-shadow(0 0 15px rgba(245, 158, 11, 0.4));
+                "></i>
+                <h2 style="
+                    color: white;
+                    font-size: 1.8rem;
+                    font-weight: 900;
+                    margin: 0;
+                    text-transform: uppercase;
+                    letter-spacing: 0.1em;
+                    text-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
+                ">CONFORMITÉ & PRIVACY</h2>
+            </div>
+            <p><strong>Objectif :</strong> estimer l'amélioration RGPD apportée par le passage à sGTM.</p>
+            
+            <h4 style="color: #64b5f6; margin-top: 20px;">🔹 1. Score RGPD</h4>
+            <p>Total RGPD = Impact des tags + Sensibilité du secteur<br>
+            Gain capé à 80%</p>
+            
+            <div style="
+                background: linear-gradient(135deg, rgba(15, 23, 42, 0.98) 0%, rgba(30, 41, 59, 0.95) 50%, rgba(15, 23, 42, 0.98) 100%);
+                border: 1px solid rgba(245, 158, 11, 0.4);
+                border-radius: 20px;
+                padding: 1.5rem;
+                margin: 1.5rem 0;
+                position: relative;
+                overflow: hidden;
+                backdrop-filter: blur(25px);
+                box-shadow: 0 15px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            " class="modal-privacy-card">
+                <h5 style="color: #f59e0b; margin-top: 0; font-weight: 700;">Pondération RGPD par tag</h5>
+                <table style="width: 100%; color: white; font-size: 13px;">
+                    <tr><td><strong>Tag</strong></td><td><strong>Score RGPD</strong></td></tr>
+                    <tr><td>Google Analytics</td><td>+10</td></tr>
+                    <tr><td>GTM Web</td><td>+10</td></tr>
+                    <tr><td>Google Ads</td><td>+15</td></tr>
+                    <tr><td>Meta Pixel</td><td>+25</td></tr>
+                    <tr><td>Matomo</td><td>–20</td></tr>
+                    <tr><td>TikTok Pixel</td><td>+25</td></tr>
+                    <tr><td>Criteo</td><td>+20</td></tr>
+                    <tr><td>LinkedIn Insight</td><td>+10</td></tr>
+                    <tr><td>Hotjar</td><td>+15</td></tr>
+                    <tr><td>Clarity</td><td>+15</td></tr>
+                    <tr><td>Consent CMP</td><td>–30</td></tr>
+                </table>
+            </div>
+            
+            <div style="
+                background: linear-gradient(135deg, rgba(15, 23, 42, 0.98) 0%, rgba(30, 41, 59, 0.95) 50%, rgba(15, 23, 42, 0.98) 100%);
+                border: 1px solid rgba(245, 158, 11, 0.4);
+                border-radius: 20px;
+                padding: 1.5rem;
+                margin: 1.5rem 0;
+                position: relative;
+                overflow: hidden;
+                backdrop-filter: blur(25px);
+                box-shadow: 0 15px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            " class="modal-privacy-card">
+                <h5 style="color: #f59e0b; margin-top: 0; font-weight: 700;">Score RGPD par secteur</h5>
+                <table style="width: 100%; color: white; font-size: 13px;">
+                    <tr><td><strong>Secteur</strong></td><td><strong>Score</strong></td></tr>
+                    <tr><td>E-commerce</td><td>+20</td></tr>
+                    <tr><td>Media</td><td>+20</td></tr>
+                    <tr><td>Finance</td><td>+25</td></tr>
+                    <tr><td>Travel</td><td>+15</td></tr>
+                    <tr><td>Automotive</td><td>+10</td></tr>
+                    <tr><td>Real-estate</td><td>+10</td></tr>
+                    <tr><td>Other</td><td>+5</td></tr>
+                </table>
+            </div>
+            
+            <h4 style="color: #64b5f6; margin-top: 20px;">🔹 2. Réduction trafic non conforme</h4>
+            <p>Trafic non conforme réduit = 90% du score RGPD final</p>
+            
+            <h4 style="color: #64b5f6; margin-top: 20px;">🔹 3. Réduction cookies tiers</h4>
+            <p>Estimée à –65% de façon générique avec sGTM (déport serveur des appels publicitaires)</p>
+            
+            <div style="
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin: 2rem 0;
+                padding: 1.5rem;
+                background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(79, 70, 229, 0.1) 100%);
+                border-radius: 20px;
+                border: 1px solid rgba(99, 102, 241, 0.3);
+                position: relative;
+                overflow: hidden;
+            " class="modal-section-header-reliability">
+                <i class="fas fa-cogs" style="
+                    color: #6366f1;
+                    font-size: 2rem;
+                    margin-right: 1rem;
+                    filter: drop-shadow(0 0 15px rgba(99, 102, 241, 0.4));
+                "></i>
+                <h2 style="
+                    color: white;
+                    font-size: 1.8rem;
+                    font-weight: 900;
+                    margin: 0;
+                    text-transform: uppercase;
+                    letter-spacing: 0.1em;
+                    text-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+                ">FIABILITÉ & CONTRÔLE</h2>
+            </div>
+            <p><strong>Objectif :</strong> présenter les avantages techniques indirects du server-side</p>
+            
+            <div style="
+                background: linear-gradient(135deg, rgba(15, 23, 42, 0.98) 0%, rgba(30, 41, 59, 0.95) 50%, rgba(15, 23, 42, 0.98) 100%);
+                border: 1px solid rgba(99, 102, 241, 0.4);
+                border-radius: 20px;
+                padding: 1.5rem;
+                margin: 1.5rem 0;
+                position: relative;
+                overflow: hidden;
+                backdrop-filter: blur(25px);
+                box-shadow: 0 15px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            " class="modal-reliability-card">
+                <table style="width: 100%; color: white; font-size: 13px;">
+                    <tr><td><strong>Fonction</strong></td><td><strong>Explication</strong></td></tr>
+                    <tr><td>Résilience aux Adblockers</td><td>Les tags exécutés côté serveur ne sont pas bloqués par les extensions</td></tr>
+                    <tr><td>Flexibilité technique</td><td>Possibilité d'ajouter des middlewares, logique métier, filtrage d'événements</td></tr>
+                    <tr><td>Enrichissement des données</td><td>Ajout d'ID client, CRM, hashing, scoring côté serveur avant envoi plateforme</td></tr>
+                    <tr><td>Surcouche de sécurité</td><td>Validation, audit, traitement isolé des données, logs serveur</td></tr>
+                    <tr><td>Hébergement 100% européen</td><td>Aucune donnée vers les US → conformité RGPD renforcée</td></tr>
+                </table>
+            </div>
+        </div>
+        </div> <!-- Fermeture du body scrollable -->
+        </div> <!-- Fermeture du contenu modal -->
+    `;
+    
+    modal.className = 'modal';
+    modal.appendChild(modalContent);
+    document.body.appendChild(modal);
+    
+    // Animation d'apparition
+    setTimeout(() => {
+        modal.style.opacity = '1';
+    }, 10);
+    
+    // Fermer la modal en cliquant à l'extérieur
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.style.opacity = '0';
+            setTimeout(() => modal.remove(), 300);
+        }
+    });
+    
+    // Fermer avec Escape
+    const handleEscape = (e) => {
+        if (e.key === 'Escape') {
+            modal.style.opacity = '0';
+            setTimeout(() => modal.remove(), 300);
+            document.removeEventListener('keydown', handleEscape);
+        }
+    };
+    document.addEventListener('keydown', handleEscape);
+}

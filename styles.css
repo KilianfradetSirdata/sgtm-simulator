@@ -8,7 +8,6 @@ h2 {
     font-size: 2.2rem;
     color: #10b981;
     font-weight: 700;
-    text-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
     margin-bottom: 2rem;
 }
 
@@ -1917,6 +1916,144 @@ body {
 
 .right-panel .export-image-btn:active {
     transform: translateY(-1px) scale(1.02);
+}
+
+/* Styles pour les section-headers de la modal */
+.modal-section-header-performance::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #06b6d4, #0ea5e9, #06b6d4);
+    background-size: 300% 100%;
+    animation: modal-performance-header-shimmer 3s ease-in-out infinite;
+}
+
+@keyframes modal-performance-header-shimmer {
+    0%, 100% { background-position: -300% 0; }
+    50% { background-position: 300% 0; }
+}
+
+.modal-section-header-business::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #10b981, #22c55e, #10b981);
+    background-size: 300% 100%;
+    animation: modal-business-header-shimmer 3s ease-in-out infinite;
+}
+
+@keyframes modal-business-header-shimmer {
+    0%, 100% { background-position: -300% 0; }
+    50% { background-position: 300% 0; }
+}
+
+.modal-section-header-privacy::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #f59e0b, #fbbf24, #f59e0b);
+    background-size: 300% 100%;
+    animation: modal-privacy-header-shimmer 3s ease-in-out infinite;
+}
+
+@keyframes modal-privacy-header-shimmer {
+    0%, 100% { background-position: -300% 0; }
+    50% { background-position: 300% 0; }
+}
+
+.modal-section-header-reliability::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #6366f1, #8b5cf6, #6366f1);
+    background-size: 300% 100%;
+    animation: modal-reliability-header-shimmer 3s ease-in-out infinite;
+}
+
+@keyframes modal-reliability-header-shimmer {
+    0%, 100% { background-position: -300% 0; }
+    50% { background-position: 300% 0; }
+}
+
+/* Styles pour les cards de tableaux de la modal */
+.modal-performance-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #06b6d4, #0891b2, #06b6d4);
+    background-size: 300% 100%;
+    animation: modal-performance-shimmer 4s ease-in-out infinite;
+}
+
+@keyframes modal-performance-shimmer {
+    0%, 100% { background-position: -300% 0; }
+    50% { background-position: 300% 0; }
+}
+
+.modal-business-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #10b981, #059669, #10b981);
+    background-size: 300% 100%;
+    animation: modal-business-shimmer 4s ease-in-out infinite;
+}
+
+@keyframes modal-business-shimmer {
+    0%, 100% { background-position: -300% 0; }
+    50% { background-position: 300% 0; }
+}
+
+.modal-privacy-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #f59e0b, #fbbf24, #f59e0b);
+    background-size: 300% 100%;
+    animation: modal-privacy-shimmer 4s ease-in-out infinite;
+}
+
+@keyframes modal-privacy-shimmer {
+    0%, 100% { background-position: -300% 0; }
+    50% { background-position: 300% 0; }
+}
+
+.modal-reliability-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #6366f1, #8b5cf6, #6366f1);
+    background-size: 300% 100%;
+    animation: modal-reliability-shimmer 4s ease-in-out infinite;
+}
+
+@keyframes modal-reliability-shimmer {
+    0%, 100% { background-position: -300% 0; }
+    50% { background-position: 300% 0; }
 }
 
 .right-panel .export-image-btn i {
