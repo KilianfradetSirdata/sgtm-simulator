@@ -86,6 +86,89 @@ function getResourceType(url, contentType = '') {
   return 'other';
 }
 
+// Fonction pour récupérer le contenu d'un site avec gestion avancée des redirections
+async function fetchSiteContent(siteUrl) {
+  const strategies = [
+    // Stratégie 1: Augmenter le nombre de redirections autorisées
+    {
+      name: 'high_redirects',
+      config: {
+        timeout: 15000,
+        maxRedirects: 20,
+        validateStatus: (status) => status >= 200 && status < 400,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+          'Accept-Language': 'fr-FR,fr;q=0.9,en;q=0.8',
+          'Accept-Encoding': 'gzip, deflate, br',
+          'DNT': '1',
+          'Connection': 'keep-alive',
+          'Upgrade-Insecure-Requests': '1'
+        }
+      }
+    },
+    // Stratégie 2: Essayer avec www. si pas déjà présent
+    {
+      name: 'with_www',
+      config: {
+        timeout: 10000,
+        maxRedirects: 10,
+        validateStatus: (status) => status >= 200 && status < 400,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'
+        }
+      }
+    },
+    // Stratégie 3: Essayer en HTTP si HTTPS échoue
+    {
+      name: 'http_fallback',
+      config: {
+        timeout: 10000,
+        maxRedirects: 15,
+        validateStatus: (status) => status >= 200 && status < 400,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        }
+      }
+    }
+  ];
+
+  let lastError = null;
+
+  for (const strategy of strategies) {
+    try {
+      let urlToTry = siteUrl;
+      
+      // Modifier l'URL selon la stratégie
+      if (strategy.name === 'with_www' && !siteUrl.includes('www.')) {
+        urlToTry = siteUrl.replace('://', '://www.');
+      } else if (strategy.name === 'http_fallback' && siteUrl.startsWith('https://')) {
+        urlToTry = siteUrl.replace('https://', 'http://');
+      }
+
+      console.log(`Tentative avec stratégie ${strategy.name}: ${urlToTry}`);
+      
+      const response = await axios.get(urlToTry, strategy.config);
+      console.log(`Succès avec stratégie ${strategy.name}`);
+      
+      return {
+        data: response.data,
+        finalUrl: response.request.res.responseUrl || urlToTry,
+        strategy: strategy.name
+      };
+      
+    } catch (error) {
+      console.log(`Échec avec stratégie ${strategy.name}: ${error.message}`);
+      lastError = error;
+      continue;
+    }
+  }
+
+  // Si toutes les stratégies échouent, lancer la dernière erreur
+  throw lastError;
+}
+
 // Endpoint pour analyser un site web
 app.post('/api/analyze', async (req, res) => {
   const { url, sector } = req.body;
@@ -106,16 +189,18 @@ app.post('/api/analyze', async (req, res) => {
     // Extraire le domaine du site
     const siteDomain = new URL(siteUrl).hostname;
     
-    // Récupérer le HTML du site
-    const response = await axios.get(siteUrl, {
-      timeout: 10000,
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-      }
-    });
+    // Récupérer le HTML du site avec gestion avancée des redirections
+    const siteContent = await fetchSiteContent(siteUrl);
+    const html = siteContent.data;
+    const finalUrl = siteContent.finalUrl;
+    const strategy = siteContent.strategy;
     
-    const html = response.data;
+    console.log(`Site analysé avec succès (stratégie: ${strategy}, URL finale: ${finalUrl})`);
+    
     const $ = cheerio.load(html);
+    
+    // Utiliser l'URL finale pour les calculs de domaine
+    const finalSiteDomain = new URL(finalUrl).hostname;
     
     // Collecter les ressources
     const resources = [];
@@ -130,7 +215,7 @@ app.post('/api/analyze', async (req, res) => {
           if (src.startsWith('//')) {
             fullUrl = 'https:' + src;
           } else if (!src.startsWith('http')) {
-            fullUrl = new URL(src, siteUrl).href;
+            fullUrl = new URL(src, finalUrl).href;
           }
           
           const resourceDomain = new URL(fullUrl).hostname;
@@ -138,7 +223,7 @@ app.post('/api/analyze', async (req, res) => {
           resources.push({
             url: fullUrl,
             type: 'script',
-            domain: isDomainFirstParty(resourceDomain, siteDomain) ? '1st party' : '3rd party',
+            domain: isDomainFirstParty(resourceDomain, finalSiteDomain) ? '1st party' : '3rd party',
             domainName: resourceDomain,
             size: null, // Sera estimé plus tard
             loadTime: null
@@ -158,7 +243,7 @@ app.post('/api/analyze', async (req, res) => {
           if (href.startsWith('//')) {
             fullUrl = 'https:' + href;
           } else if (!href.startsWith('http')) {
-            fullUrl = new URL(href, siteUrl).href;
+            fullUrl = new URL(href, finalUrl).href;
           }
           
           const resourceDomain = new URL(fullUrl).hostname;
@@ -166,7 +251,7 @@ app.post('/api/analyze', async (req, res) => {
           resources.push({
             url: fullUrl,
             type: 'style',
-            domain: isDomainFirstParty(resourceDomain, siteDomain) ? '1st party' : '3rd party',
+            domain: isDomainFirstParty(resourceDomain, finalSiteDomain) ? '1st party' : '3rd party',
             domainName: resourceDomain,
             size: null,
             loadTime: null
@@ -186,7 +271,7 @@ app.post('/api/analyze', async (req, res) => {
           if (src.startsWith('//')) {
             fullUrl = 'https:' + src;
           } else if (!src.startsWith('http')) {
-            fullUrl = new URL(src, siteUrl).href;
+            fullUrl = new URL(src, finalUrl).href;
           }
           
           const resourceDomain = new URL(fullUrl).hostname;
@@ -194,7 +279,7 @@ app.post('/api/analyze', async (req, res) => {
           resources.push({
             url: fullUrl,
             type: 'image',
-            domain: isDomainFirstParty(resourceDomain, siteDomain) ? '1st party' : '3rd party',
+            domain: isDomainFirstParty(resourceDomain, finalSiteDomain) ? '1st party' : '3rd party',
             domainName: resourceDomain,
             size: null,
             loadTime: null
@@ -260,7 +345,7 @@ app.post('/api/analyze', async (req, res) => {
     
     // Renvoyer les résultats
     res.json({
-      url: siteUrl,
+      url: finalUrl,
       resources: completedResources,
       stats,
       analysisTime: new Date().toISOString()
@@ -268,10 +353,32 @@ app.post('/api/analyze', async (req, res) => {
     
   } catch (error) {
     console.error('Erreur lors de l\'analyse du site:', error.message);
-    res.status(500).json({ 
-      error: 'Erreur lors de l\'analyse du site', 
-      message: error.message,
-      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    
+    // Déterminer le type d'erreur et renvoyer une réponse appropriée
+    let errorType = 'unknown';
+    let userMessage = 'Impossible d\'analyser ce site';
+    
+    if (error.message.includes('Maximum number of redirects')) {
+      errorType = 'too_many_redirects';
+      userMessage = 'Ce site a trop de redirections et ne peut pas être analysé';
+    } else if (error.message.includes('timeout')) {
+      errorType = 'timeout';
+      userMessage = 'Le site met trop de temps à répondre';
+    } else if (error.message.includes('ENOTFOUND') || error.message.includes('ECONNREFUSED')) {
+      errorType = 'connection_error';
+      userMessage = 'Impossible de se connecter à ce site';
+    } else if (error.response && error.response.status >= 400) {
+      errorType = 'http_error';
+      userMessage = `Le site a renvoyé une erreur HTTP ${error.response.status}`;
+    }
+    
+    // Renvoyer une réponse avec un code 200 mais indiquant l'échec de l'analyse
+    res.json({ 
+      success: false,
+      error: errorType,
+      message: userMessage,
+      url: req.body.url,
+      analysisTime: new Date().toISOString()
     });
   }
 });

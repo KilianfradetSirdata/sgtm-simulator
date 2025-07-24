@@ -7,47 +7,51 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
+    
+    <!-- Librairie pour l'export image -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
-    <div class="container-fluid p-0">
-        <div class="row g-0">
-            <!-- Colonne de gauche - Formulaire d'analyse -->
-            <div class="col-md-5 left-panel">
-                <h1 class="welcome-title mb-4">BIENVENUE</h1>
-                <p class="mb-5">Découvrez les avantages du produit GTM Server Side par Sirdata pour votre site web. Analysez les performances, les gains business et la conformité RGPD.</p>
-                
-                <!-- Formulaire d'analyse -->
-                <div class="card bg-white mt-4 p-4 border-0">
-                    <div class="card-body">
-                    <h2 class="mb-4">Analysez les avantages</h2>
-                    <form id="analyzer-form">
+    <div class="container py-5">
+        <!-- En-tête et introduction -->
+        <div class="text-center mb-5">
+            <h1 class="welcome-title mb-4">SIRDATA SERVER SIDE</h1>
+            <p class="intro-text mb-5 mx-auto">Découvrez les avantages du produit GTM Server Side par Sirdata pour votre site web. Analysez les performances, les gains business et la conformité RGPD.</p>
+        </div>
+        
+        <!-- Formulaire d'analyse -->
+        <div class="main-form-card mt-4 mx-auto" style="max-width: 800px;">
+            <div class="form-card-body">
+            <h2 class="mb-4 text-center">Analysez les avantages</h2>
+            <form id="analyzer-form">
                         <div class="mb-4">
                             <label for="site-url" class="form-label">URL de votre site *</label>
                             <input type="url" class="form-control" id="site-url" placeholder="https://www.votresite.com" required>
                         </div>
                         
-                        <div class="mb-4">
-                            <label for="business-sector" class="form-label">Secteur d'activité *</label>
-                            <select class="form-select" id="business-sector">
-                                <option value="e-commerce" selected>E-commerce</option>
-                                <option value="media">Média</option>
-                                <option value="finance">Finance</option>
-                                <option value="travel">Voyage</option>
-                                <option value="automotive">Automobile</option>
-                                <option value="real-estate">Immobilier</option>
-                                <option value="other">Autre</option>
-                            </select>
-                        </div>
-                        
-                        <div class="mb-4">
-                            <label for="hit-count" class="form-label">Nombre de hit estimé *</label>
-                            <select class="form-select" id="hit-count">
-                                <option value="less-than-10k" selected>Moins de 2 000 000 hits/jour</option>
-                                <option value="10k-50k">De 2 000 000 à 5 000 000 hits/jour</option>
-                                <option value="50k-100k">De 5 000 000 à 10 000 000 hits/jour</option>
-                                <option value="100k-500k">De 10 000 000 à 50 000 000 hits/jour</option>
-                                <option value="more-than-1m">Plus de 50 000 000 hits/jour</option>
-                            </select>
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label for="business-sector" class="form-label">Secteur d'activité *</label>
+                                <select class="form-select" id="business-sector">
+                                    <option value="e-commerce" selected>E-commerce</option>
+                                    <option value="media">Média</option>
+                                    <option value="finance">Finance</option>
+                                    <option value="travel">Voyage</option>
+                                    <option value="automotive">Automobile</option>
+                                    <option value="real-estate">Immobilier</option>
+                                    <option value="other">Autre</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="hit-count" class="form-label">Nombre de hit estimé *</label>
+                                <select class="form-select" id="hit-count">
+                                    <option value="less-than-10k" selected>Moins de 2 000 000 hits/jour</option>
+                                    <option value="10k-50k">De 2 000 000 à 5 000 000 hits/jour</option>
+                                    <option value="50k-100k">De 5 000 000 à 10 000 000 hits/jour</option>
+                                    <option value="100k-500k">De 10 000 000 à 50 000 000 hits/jour</option>
+                                    <option value="more-than-1m">Plus de 50 000 000 hits/jour</option>
+                                </select>
+                            </div>
                         </div>
                         
                         <div class="mb-4">
@@ -102,24 +106,21 @@
                             </div>
                         </div>
                         
-                        <div class="mt-5">
+                        <div class="mt-5 text-center">
                             <button type="submit" class="btn btn-primary btn-lg">Voir les avantages</button>
                         </div>
                     </form>
                     </div>
                 </div>
-            </div>
-            
-            <!-- Colonne de droite - Résultats de l'analyse -->
-            <div class="col-md-7 right-panel">
-                <div class="right-panel-content">
-                    <div class="sgtm-logo-container">
-                        <img src="assets/sGTM.png" alt="GTM Server Side" class="sgtm-logo">
-                    </div>
-                    <div class="results-card" id="results-wrapper">
-                        <div id="results-container"></div>
-                    </div>
-                </div>
+        
+                <!-- Panneau latéral pour les résultats -->
+        <div class="panel-overlay" id="panel-overlay"></div>
+        <div class="right-panel" id="right-panel">
+            <button class="panel-close-btn" id="panel-close-btn">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="results-card" id="results-wrapper">
+                <div id="results-container"></div>
             </div>
         </div>
     </div>

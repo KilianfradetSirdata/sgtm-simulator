@@ -128,7 +128,6 @@ function getBaseROASBySector(sector) {
 document.addEventListener('DOMContentLoaded', function() {
     const analyzerForm = document.getElementById('analyzer-form');
     const submitButton = document.querySelector('button[type="submit"]');
-    const sgtmLogoContainer = document.querySelector('.sgtm-logo-container');
     
     // Masquer les résultats par défaut
     const resultsWrapper = document.getElementById('results-wrapper');
@@ -198,6 +197,13 @@ document.addEventListener('DOMContentLoaded', function() {
             // Masquer l'indicateur de chargement
             hideLoading();
             
+            // Vérifier si l'analyse a réussi
+            if (data.success === false) {
+                // Afficher l'erreur spécifique
+                showError(data.message || 'Erreur lors de l\'analyse du site');
+                return;
+            }
+            
             // Afficher les résultats
             displayResults(data);
         })
@@ -216,14 +222,12 @@ document.addEventListener('DOMContentLoaded', function() {
         submitButton.classList.add('btn-loading');
         submitButton.disabled = true;
         
-        // Garder l'image visible pendant le chargement
-        sgtmLogoContainer.classList.remove('hide');
-        
-        // Masquer la carte de résultats pendant le chargement
+        // Préparer le conteneur de résultats pour l'affichage du chargement
         const resultsWrapper = document.getElementById('results-wrapper');
         resultsWrapper.classList.remove('show');
-        resultsWrapper.style.display = 'none';
+        resultsWrapper.style.display = 'block';
         
+        // Afficher l'indicateur de chargement dans le conteneur de résultats
         resultsContainer.innerHTML = `
             <div class="text-center p-4">
                 <div class="spinner-border text-primary" role="status">
@@ -246,11 +250,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Rétablir le bouton à son état normal
         hideLoading();
         
-        // Faire disparaitre l'image en fondu
-        sgtmLogoContainer.classList.add('hide');
-        
-        const resultsWrapper = document.getElementById('results-wrapper');
-        
+        // Préparer le message d'erreur
         resultsContainer.innerHTML = `
             <div class="alert alert-danger" role="alert">
                 <h4 class="alert-heading">Erreur!</h4>
@@ -260,20 +260,14 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
         `;
         
-        // Ajouter un délai pour l'animation de fondu
-        resultsWrapper.style.display = 'block';
-        setTimeout(() => {
-            resultsWrapper.classList.add('show');
-        }, 500);
+        // Le panneau latéral s'ouvrira automatiquement grâce à l'observateur dans right-panel.js
+        // qui détecte les changements dans le contenu du resultsContainer
     }
     
     // Fonction pour afficher les résultats
     function displayResults(data) {
         // Rétablir le bouton à son état normal
         hideLoading();
-        
-        // Faire disparaitre l'image en fondu
-        sgtmLogoContainer.classList.add('hide');
         
         // Référence au wrapper pour l'animation
         const resultsWrapper = document.getElementById('results-wrapper');
@@ -417,53 +411,79 @@ document.addEventListener('DOMContentLoaded', function() {
                     <h2>Résultats de l'analyse</h2>
                 </div>
                 <div class="results-container">
-                    <div class="card shadow my-4">
-                        <div class="card-header bg-primary text-white">
-                            <h3><i class="fas fa-tachometer-alt"></i> Performance</h3>
+                    <div class="performance-section">
+                        <div class="section-header-performance">
+                            <i class="fas fa-tachometer-alt section-icon-performance"></i>
+                            <h2 class="section-title-performance">Performance</h2>
                         </div>
-                        <div class="card-body">
+                        <div class="performance-cards-container">
                             <div class="row">
-                                <div class="col-md-4 mb-3">
-                                    <div class="card bg-light h-100">
-                                        <div class="card-body text-center">
-                                            <h4>Temps de chargement</h4>
-                                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                                <span>Actuel :</span>
-                                                <span class="fw-bold">${data.stats.loadTime.toFixed(2)} s</span>
+                                <div class="col-md-6 mb-3">
+                                    <div class="performance-card">
+                                        <i class="fas fa-tachometer-alt performance-icon"></i>
+                                        <h3 class="performance-title">Temps de chargement</h3>
+                                        <div class="metric-comparison">
+                                            <div class="metric-current-section">
+                                                <div class="metric-label-modern">Actuel</div>
+                                                <div class="metric-value-current">${data.stats.loadTime.toFixed(2)} <span class="metric-unit">s</span></div>
                                             </div>
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <span>Avec sGTM :</span>
-                                                <span class="fw-bold text-success">${estimatedLoadTime} s</span>
+                                            <div class="vs-separator">
+                                                <div class="vs-text">VS</div>
+                                                <div class="vs-line"></div>
                                             </div>
-                                            <div class="mt-3">
-                                                <span class="badge bg-success p-2">Gain : -${Math.round(combinedLoadTimeFactor * 100)}%</span>
+                                            <div class="metric-improved-section">
+                                                <div class="metric-label-modern">Avec sGTM</div>
+                                                <div class="metric-value-improved">${estimatedLoadTime} <span class="metric-unit">s</span></div>
                                             </div>
+                                        </div>
+                                        <div class="text-center">
+                                            <span class="gain-badge-enhanced">Gain : -${Math.round(combinedLoadTimeFactor * 100)}%</span>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-md-4 mb-3">
-                                    <div class="card bg-light h-100">
-                                        <div class="card-body text-center">
-                                            <h4>Nombre requêtes scripts</h4>
-                                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                                <span>Actuel :</span>
-                                                <span class="fw-bold">${baseRequests}</span>
+                                <div class="col-md-6 mb-3">
+                                    <div class="performance-card">
+                                        <i class="fas fa-code performance-icon"></i>
+                                        <h3 class="performance-title">Nombre requêtes scripts</h3>
+                                        <div class="metric-comparison">
+                                            <div class="metric-current-section">
+                                                <div class="metric-label-modern">Actuel</div>
+                                                <div class="metric-value-current">${baseRequests}</div>
                                             </div>
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <span>Avec sGTM :</span>
-                                                <span class="fw-bold text-success">${optimizedRequests}</span>
+                                            <div class="vs-separator">
+                                                <div class="vs-text">VS</div>
+                                                <div class="vs-line"></div>
                                             </div>
-                                            <div class="mt-3">
-                                                <span class="badge bg-success p-2">Gain : -${requestGainPercent}%</span>
+                                            <div class="metric-improved-section">
+                                                <div class="metric-label-modern">Avec sGTM</div>
+                                                <div class="metric-value-improved">${optimizedRequests}</div>
                                             </div>
+                                        </div>
+                                        <div class="text-center">
+                                            <span class="gain-badge-enhanced">Gain : -${requestGainPercent}%</span>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-md-4 mb-3">
-                                    <div class="card bg-light h-100">
-                                        <div class="card-body text-center">
-                                            <h4>Poids total des scripts</h4>
-                                            <h2>${formatBytes(data.stats.jsSize)}</h2>
+                                <div class="col-md-6 mb-3">
+                                    <div class="performance-card">
+                                        <i class="fas fa-weight-hanging performance-icon"></i>
+                                        <h3 class="performance-title">Poids total des scripts</h3>
+                                        <div class="metric-comparison">
+                                            <div class="metric-current-section">
+                                                <div class="metric-label-modern">Actuel</div>
+                                                <div class="metric-value-current">${formatBytes(data.stats.jsSize)}</div>
+                                            </div>
+                                            <div class="vs-separator">
+                                                <div class="vs-text">VS</div>
+                                                <div class="vs-line"></div>
+                                            </div>
+                                            <div class="metric-improved-section">
+                                                <div class="metric-label-modern">Avec sGTM</div>
+                                                <div class="metric-value-improved">${formatBytes(Math.round(data.stats.jsSize * (optimizedRequests / baseRequests)))}</div>
+                                            </div>
+                                        </div>
+                                        <div class="text-center">
+                                            <span class="gain-badge-enhanced">Gain : -${requestGainPercent}%</span>
                                         </div>
                                     </div>
                                 </div>
@@ -471,75 +491,79 @@ document.addEventListener('DOMContentLoaded', function() {
                         </div>
                     </div>
                     
-                    <div class="card shadow my-4">
-                        <div class="card-header bg-success text-white">
-                            <h3><i class="fas fa-chart-line"></i> Gain business</h3>
+                    <div class="business-section">
+                        <div class="section-header-business">
+                            <i class="fas fa-chart-line section-icon-business"></i>
+                            <h2 class="section-title-business">Gain business</h2>
                         </div>
-                        <div class="card-body">
+                        <div class="business-cards-container">
                             <div class="row">
                                 <div class="col-md-4 mb-3">
-                                    <div class="card bg-light h-100">
-                                        <div class="card-body">
-                                            <h4 class="text-center">Collecte de données</h4>
-                                            <div class="mt-4">
-                                                <div class="position-relative mb-1">
-                                                    <div style="width: ${estimatedDataCollection}%" class="d-flex justify-content-end">
-                                                        <span>${estimatedDataCollection}%</span>
-                                                    </div>
-                                                </div>
-                                                <div class="progress mb-3" style="height: 25px;">
-                                                    <div class="progress-bar" role="progressbar" style="width: ${baseDataCollection}%" aria-valuenow="${baseDataCollection}" aria-valuemin="0" aria-valuemax="100"></div>
-                                                    <div class="progress-bar bg-success" role="progressbar" style="width: ${Math.min(gainFinal, 95 - baseDataCollection)}%" aria-valuenow="${Math.min(gainFinal, 95 - baseDataCollection)}" aria-valuemin="0" aria-valuemax="100"></div>
-                                                </div>
-                                                
-                                                <div class="text-center mt-3">
-                                                    <span class="badge bg-success p-2">Gain : +${Math.min(gainFinal, 95 - baseDataCollection)}%</span>
-                                                </div>
+                                    <div class="business-card">
+                                        <i class="fas fa-database business-icon"></i>
+                                        <h3 class="business-title">Collecte de données</h3>
+                                        <div class="metric-display">
+                                            <div class="metric-section">
+                                                <div class="metric-label-business">Actuel</div>
+                                                <div class="current-value">${baseDataCollection}<span class="unit">%</span></div>
                                             </div>
+                                            <div class="metric-section">
+                                                <div class="metric-label-business">Avec sGTM</div>
+                                                <div class="improved-value">${estimatedDataCollection}<span class="unit">%</span></div>
+                                            </div>
+                                        </div>
+                                        <div class="progress-modern mb-3">
+                                            <div class="progress-bar-base" style="width: ${baseDataCollection}%"></div>
+                                            <div class="progress-bar-gain" style="width: ${Math.min(gainFinal, 95 - baseDataCollection)}%; margin-left: ${baseDataCollection}%"></div>
+                                        </div>
+                                        <div class="text-center">
+                                            <span class="gain-badge-business">Gain : +${Math.min(gainFinal, 95 - baseDataCollection)}%</span>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="col-md-4 mb-3">
-                                    <div class="card bg-light h-100">
-                                        <div class="card-body">
-                                            <h4 class="text-center">Conversions mesurées</h4>
-                                            <div class="mt-4">
-                                                <div class="position-relative mb-1">
-                                                    <div style="width: ${estimatedConversions}%" class="d-flex justify-content-end">
-                                                        <span>${estimatedConversions}%</span>
-                                                    </div>
-                                                </div>
-                                                <div class="progress mb-3" style="height: 25px;">
-                                                    <div class="progress-bar" role="progressbar" style="width: ${baseConversionRate}%" aria-valuenow="${baseConversionRate}" aria-valuemin="0" aria-valuemax="100"></div>
-                                                    <div class="progress-bar bg-success" role="progressbar" style="width: ${Math.min(conversionGain, 95 - baseConversionRate)}%" aria-valuenow="${Math.min(conversionGain, 95 - baseConversionRate)}" aria-valuemin="0" aria-valuemax="100"></div>
-                                                </div>
-                                                
-                                                <div class="text-center mt-3">
-                                                    <span class="badge bg-success p-2">Gain : +${Math.min(conversionGain, 95 - baseConversionRate)}%</span>
-                                                </div>
+                                    <div class="business-card">
+                                        <i class="fas fa-chart-line business-icon"></i>
+                                        <h3 class="business-title">Conversions mesurées</h3>
+                                        <div class="metric-display">
+                                            <div class="metric-section">
+                                                <div class="metric-label-business">Actuel</div>
+                                                <div class="current-value">${baseConversionRate}<span class="unit">%</span></div>
                                             </div>
+                                            <div class="metric-section">
+                                                <div class="metric-label-business">Avec sGTM</div>
+                                                <div class="improved-value">${estimatedConversions}<span class="unit">%</span></div>
+                                            </div>
+                                        </div>
+                                        <div class="progress-modern mb-3">
+                                            <div class="progress-bar-base" style="width: ${baseConversionRate}%"></div>
+                                            <div class="progress-bar-gain" style="width: ${Math.min(conversionGain, 95 - baseConversionRate)}%; margin-left: ${baseConversionRate}%"></div>
+                                        </div>
+                                        <div class="text-center">
+                                            <span class="gain-badge-business">Gain : +${Math.min(conversionGain, 95 - baseConversionRate)}%</span>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="col-md-4 mb-3">
-                                    <div class="card bg-light h-100">
-                                        <div class="card-body">
-                                            <h4 class="text-center">ROAS estimé</h4>
-                                            <div class="mt-4">
-                                                <div class="position-relative mb-1">
-                                                    <div style="width: ${Math.min((baseROAS * 10) + Math.min((estimatedROAS - baseROAS) * 10, 100), 100)}%" class="d-flex justify-content-end">
-                                                        <span>${estimatedROAS}</span>
-                                                    </div>
-                                                </div>
-                                                <div class="progress mb-3" style="height: 25px;">
-                                                    <div class="progress-bar" role="progressbar" style="width: ${Math.min(baseROAS * 10, 100)}%" aria-valuenow="${baseROAS}" aria-valuemin="0" aria-valuemax="10"></div>
-                                                    <div class="progress-bar bg-success" role="progressbar" style="width: ${Math.min((estimatedROAS - baseROAS) * 10, 100)}%" aria-valuenow="${estimatedROAS - baseROAS}" aria-valuemin="0" aria-valuemax="10"></div>
-                                                </div>
-                                                
-                                                <div class="text-center mt-3">
-                                                    <span class="badge bg-success p-2">Gain : +${((roasGainFactor - 1) * 100).toFixed(1)}%</span>
-                                                </div>
+                                    <div class="business-card">
+                                        <i class="fas fa-dollar-sign business-icon"></i>
+                                        <h3 class="business-title">ROAS estimé</h3>
+                                        <div class="metric-display">
+                                            <div class="metric-section">
+                                                <div class="metric-label-business">Actuel</div>
+                                                <div class="current-value">${baseROAS.toFixed(1)}<span class="unit">x</span></div>
                                             </div>
+                                            <div class="metric-section">
+                                                <div class="metric-label-business">Avec sGTM</div>
+                                                <div class="improved-value">${estimatedROAS}<span class="unit">x</span></div>
+                                            </div>
+                                        </div>
+                                        <div class="progress-modern mb-3">
+                                            <div class="progress-bar-base" style="width: ${Math.min(baseROAS * 10, 100)}%"></div>
+                                            <div class="progress-bar-gain" style="width: ${Math.min((estimatedROAS - baseROAS) * 10, 100)}%; margin-left: ${Math.min(baseROAS * 10, 100)}%"></div>
+                                        </div>
+                                        <div class="text-center">
+                                            <span class="gain-badge-business">Gain : +${((roasGainFactor - 1) * 100).toFixed(1)}%</span>
                                         </div>
                                     </div>
                                 </div>
@@ -547,66 +571,94 @@ document.addEventListener('DOMContentLoaded', function() {
                         </div>
                     </div>
                     
-                    <div class="card shadow my-4">
-                        <div class="card-header bg-warning text-dark">
-                            <h3><i class="fas fa-lock"></i> Conformité & Privacy</h3>
+                    <div class="privacy-section">
+                        <div class="section-header-privacy">
+                            <i class="fas fa-shield-alt section-icon-privacy"></i>
+                            <h2 class="section-title-privacy">Conformité & Privacy</h2>
                         </div>
-                        <div class="card-body">
-                            <ul class="list-group">
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    Réduction des cookies tiers
-                                    <span class="badge bg-success rounded-pill">–55 à –75%</span>
-                                </li>
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    Tags à risque RGPD réduits
-                                    <span class="badge bg-danger rounded-pill">–${estimatedPrivacyGain}%</span>
-                                </li>
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    Trafic non conforme RGPD réduit
-                                    <span class="badge bg-success rounded-pill">–${nonCompliantTrafficReduction}%</span>
-                                </li>
-                            </ul>
+                        <div class="privacy-cards-container">
+                            <div class="privacy-card">
+                                <i class="fas fa-cookie-bite privacy-icon"></i>
+                                <h3 class="privacy-title">Cookies tiers</h3>
+                                <div class="privacy-metric">
+                                    <div class="privacy-value">-65<span class="privacy-unit">%</span></div>
+                                    <div class="privacy-label">De réduction moyenne des cookies tiers</div>
+                                </div>
+                            </div>
+                            <div class="privacy-card">
+                                <i class="fas fa-exclamation-triangle privacy-icon"></i>
+                                <h3 class="privacy-title">Tags à risque RGPD</h3>
+                                <div class="privacy-metric">
+                                    <div class="privacy-value">-${estimatedPrivacyGain}<span class="privacy-unit">%</span></div>
+                                    <div class="privacy-label">De tags à risque</div>
+                                </div>
+                            </div>
+                            <div class="privacy-card">
+                                <i class="fas fa-user-shield privacy-icon"></i>
+                                <h3 class="privacy-title">Trafic non conforme</h3>
+                                <div class="privacy-metric">
+                                    <div class="privacy-value">-${nonCompliantTrafficReduction}<span class="privacy-unit">%</span></div>
+                                    <div class="privacy-label">De trafic non conforme</div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     
-                    <div class="card shadow my-4">
-                        <div class="card-header bg-info text-white">
-                            <h3><i class="fas fa-shield-alt"></i> Fiabilité & Contrôle</h3>
+                    <div class="reliability-section">
+                        <div class="section-header-reliability">
+                            <i class="fas fa-cogs section-icon-reliability"></i>
+                            <h2 class="section-title-reliability">Fiabilité & Contrôle</h2>
                         </div>
-                        <div class="card-body">
-                            <ul class="list-group">
-                                <li class="list-group-item">
-                                    <div class="d-flex w-100 justify-content-between">
-                                        <h6 class="mb-1"><strong>🚫 Résilience aux Adblockers</strong></h6>
-                                    </div>
-                                    <p class="mb-1">Les données essentielles continuent à remonter même en cas de bloqueurs (AdBlock, uBlock, Brave, etc.).</p>
-                                </li>
-                                <li class="list-group-item">
-                                    <div class="d-flex w-100 justify-content-between">
-                                        <h6 class="mb-1"><strong>🧰 Flexibilité technique</strong></h6>
-                                    </div>
-                                    <p class="mb-1">Intégration de middlewares, logique métier, ou filtrage sur les événements en entrée.</p>
-                                </li>
-                                <li class="list-group-item">
-                                    <div class="d-flex w-100 justify-content-between">
-                                        <h6 class="mb-1"><strong>🧠 Enrichissement des données</strong></h6>
-                                    </div>
-                                    <p class="mb-1">Ajout d'éléments CRM, hashing, scoring client ou ID login dans les événements envoyés aux plateformes.</p>
-                                </li>
-                                <li class="list-group-item">
-                                    <div class="d-flex w-100 justify-content-between">
-                                        <h6 class="mb-1"><strong>🔐 Surcouche de sécurité</strong></h6>
-                                    </div>
-                                    <p class="mb-1">Traitement des données côté serveur uniquement, avec isolation, validation, et auditabilité complète.</p>
-                                </li>
-                                <li class="list-group-item">
-                                    <div class="d-flex w-100 justify-content-between">
-                                        <h6 class="mb-1"><strong>🇪🇺 Hébergement 100% Européen</strong></h6>
-                                    </div>
-                                    <p class="mb-1">Les serveurs sont basés dans l'UE, aucune donnée ne transite vers des infrastructures américaines (RGPD compliant).</p>
-                                </li>
-                            </ul>
+                        <div class="reliability-cards-container">
+                            <div class="reliability-card">
+                                <div class="reliability-icon-wrapper">
+                                    <i class="fas fa-shield-alt reliability-icon"></i>
+                                </div>
+                                <h3 class="reliability-title">Résilience aux Adblockers</h3>
+                                <p class="reliability-description">Les données essentielles continuent à remonter même en cas de bloqueurs (AdBlock, uBlock, Brave, etc.).</p>
+                                <div class="reliability-feature-badge">Protection garantie</div>
+                            </div>
+                            <div class="reliability-card">
+                                <div class="reliability-icon-wrapper">
+                                    <i class="fas fa-tools reliability-icon"></i>
+                                </div>
+                                <h3 class="reliability-title">Flexibilité technique</h3>
+                                <p class="reliability-description">Intégration de middlewares, logique métier, ou filtrage sur les événements en entrée.</p>
+                                <div class="reliability-feature-badge">Personnalisable</div>
+                            </div>
+                            <div class="reliability-card">
+                                <div class="reliability-icon-wrapper">
+                                    <i class="fas fa-database reliability-icon"></i>
+                                </div>
+                                <h3 class="reliability-title">Enrichissement des données</h3>
+                                <p class="reliability-description">Ajout d'éléments CRM, hashing, scoring client ou ID login dans les événements envoyés aux plateformes.</p>
+                                <div class="reliability-feature-badge">Données enrichies</div>
+                            </div>
+                            <div class="reliability-card">
+                                <div class="reliability-icon-wrapper">
+                                    <i class="fas fa-lock reliability-icon"></i>
+                                </div>
+                                <h3 class="reliability-title">Surcouche de sécurité</h3>
+                                <p class="reliability-description">Traitement des données côté serveur uniquement, avec isolation, validation, et auditabilité complète.</p>
+                                <div class="reliability-feature-badge">Sécurisé</div>
+                            </div>
+                            <div class="reliability-card">
+                                <div class="reliability-icon-wrapper">
+                                    <i class="fas fa-flag reliability-icon"></i>
+                                </div>
+                                <h3 class="reliability-title">Hébergement 100% Européen</h3>
+                                <p class="reliability-description">Les serveurs sont basés dans l'UE, aucune donnée ne transite vers des infrastructures américaines (RGPD compliant).</p>
+                                <div class="reliability-feature-badge">RGPD compliant</div>
+                            </div>
                         </div>
+                    </div>
+                    
+                    <!-- Bouton Export Image -->
+                    <div class="export-section">
+                        <button id="exportImageBtn" class="export-image-btn">
+                            <i class="fas fa-image"></i>
+                            <span>Exporter en Image</span>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -616,6 +668,12 @@ document.addEventListener('DOMContentLoaded', function() {
         resultsWrapper.style.display = 'block';
         setTimeout(() => {
             resultsWrapper.classList.add('show');
+            
+            // Ajouter l'event listener pour le bouton Image après l'affichage
+            const exportBtn = document.getElementById('exportImageBtn');
+            if (exportBtn) {
+                exportBtn.addEventListener('click', () => exportToImage(data));
+            }
         }, 500);
     }
     
@@ -631,5 +689,86 @@ document.addEventListener('DOMContentLoaded', function() {
         const i = Math.floor(Math.log(bytes) / Math.log(k));
         
         return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+    }
+    
+    // Fonction pour exporter les résultats en image PNG
+    async function exportToImage(data) {
+        const exportBtn = document.getElementById('exportImageBtn');
+        const originalText = exportBtn.innerHTML;
+        
+        // Changer le texte du bouton pendant l'export
+        exportBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Génération...</span>';
+        exportBtn.disabled = true;
+        
+        try {
+            // Créer une copie du panneau pour l'export (sans le bouton export)
+            const panel = document.getElementById('right-panel');
+            const clonedPanel = panel.cloneNode(true);
+            
+            // Supprimer le bouton export de la copie
+            const exportSection = clonedPanel.querySelector('.export-section');
+            if (exportSection) {
+                exportSection.remove();
+            }
+            
+            // Supprimer le bouton de fermeture
+            const closeBtn = clonedPanel.querySelector('.panel-close-btn');
+            if (closeBtn) {
+                closeBtn.remove();
+            }
+            
+            // Ajuster les styles pour l'export
+            clonedPanel.style.position = 'relative';
+            clonedPanel.style.right = 'auto';
+            clonedPanel.style.width = '800px';
+            clonedPanel.style.height = 'auto';
+            clonedPanel.style.maxHeight = 'none';
+            clonedPanel.style.overflow = 'visible';
+            clonedPanel.style.background = 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%)';
+            clonedPanel.style.padding = '2rem';
+            
+            // Ajouter la copie au body temporairement
+            clonedPanel.style.position = 'absolute';
+            clonedPanel.style.left = '-9999px';
+            clonedPanel.style.top = '0';
+            document.body.appendChild(clonedPanel);
+            
+            // Attendre que les styles soient appliqués
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
+            // Capturer avec html2canvas
+            const canvas = await html2canvas(clonedPanel, {
+                scale: 2,
+                useCORS: true,
+                allowTaint: true,
+                backgroundColor: '#0f172a',
+                width: 800,
+                height: clonedPanel.scrollHeight
+            });
+            
+            // Supprimer la copie
+            document.body.removeChild(clonedPanel);
+            
+            // Convertir le canvas en image et télécharger
+            const imgData = canvas.toDataURL('image/png', 1.0);
+            
+            // Créer un lien de téléchargement
+            const link = document.createElement('a');
+            link.download = `Rapport_GTM_ServerSide_${new Date().toLocaleDateString('fr-FR').replace(/\//g, '-')}.png`;
+            link.href = imgData;
+            
+            // Déclencher le téléchargement
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+        } catch (error) {
+            console.error('Erreur lors de l\'export image:', error);
+            alert('Erreur lors de la génération de l\'image. Veuillez réessayer.');
+        } finally {
+            // Restaurer le bouton
+            exportBtn.innerHTML = originalText;
+            exportBtn.disabled = false;
+        }
     }
 });
